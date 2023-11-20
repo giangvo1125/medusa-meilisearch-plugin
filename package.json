@@ -1,6 +1,6 @@
 {
   "name": "@giangvo1125/medusa-meilisearch-plugin",
-  "version": "1.0.1",
+  "version": "1.0.0",
   "description": "Medusa Meilisearch search plugin",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
