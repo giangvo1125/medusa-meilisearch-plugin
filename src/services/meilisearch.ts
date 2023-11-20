@@ -1,13 +1,11 @@
+import { MeiliSearch, Settings } from "meilisearch";
+import { Logger } from "@medusajs/medusa";
 import { SearchTypes } from "@medusajs/types";
 import { AbstractSearchService, SearchUtils } from "@medusajs/utils";
-import { MeiliSearch, Settings } from "meilisearch";
-import {
-  MEILISEARCH_ERROR_CODES,
-  IMeilisearchPluginOptions,
-  MEILISEARCH_DEFAULT_HOST,
-} from "../types";
+import { IMeilisearchPluginOptions } from "../types";
+import { MEILISEARCH_ERROR_CODES } from "../enums";
+import { MEILISEARCH_DEFAULT_HOST } from "../constants";
 import { transformProduct } from "../utils/transform";
-import { Logger } from "@medusajs/medusa";
 
 class MeiliSearchService extends AbstractSearchService {
   isDefault = false;

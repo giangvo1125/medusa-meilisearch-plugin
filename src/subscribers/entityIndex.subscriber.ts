@@ -5,9 +5,9 @@ import {
   IMeilisearchPluginOptions,
   IMeilisearchPluginSettingOptions,
   IMeilisearchPluginSubscriberSettingOptions,
-  MEILISEARCH_ERROR_CODES,
-  REGISTER_MEILISEARCH_INDEX_EVENT,
 } from "../types";
+import { MEILISEARCH_ERROR_CODES } from "../enums";
+import { REGISTER_MEILISEARCH_INDEX_EVENT } from "../constants";
 
 interface IService<Entity> {
   list: (

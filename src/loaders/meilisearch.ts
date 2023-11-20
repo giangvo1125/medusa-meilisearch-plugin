@@ -2,10 +2,8 @@ import { EventBusService } from "@medusajs/medusa";
 import { MedusaContainer } from "@medusajs/modules-sdk";
 import { Logger } from "@medusajs/types";
 import MeiliSearchService from "../services/meilisearch";
-import {
-  IMeilisearchPluginOptions,
-  REGISTER_MEILISEARCH_INDEX_EVENT,
-} from "../types";
+import { IMeilisearchPluginOptions } from "../types";
+import { REGISTER_MEILISEARCH_INDEX_EVENT } from "../constants";
 
 /**
  * upsert the meilisearch index on startup.
