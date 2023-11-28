@@ -12,7 +12,8 @@
     "build:tsc:watch": "tsc --build ./tsconfig.json --watch",
     "build:tsc": "tsc -b",
     "clean": "rimraf dist",
-    "test": "jest",
+    "test": "jest --maxWorkers=50% --logHeapUsage --forceExit --detectOpenHandles --verbose",
+    "test:cov": "npm run test -- --coverage --forceExit",
     "prerelease": "npm run build",
     "release": "standard-version"
   },
@@ -39,6 +40,7 @@
     "@babel/core": "7.14.3",
     "@babel/preset-typescript": "7.21.4",
     "@types/express": "4.17.13",
+    "@types/jest": "27.4.1",
     "@types/node": "17.0.8",
     "babel-preset-medusa-package": "1.1.13",
     "cpx": "1.5.0",
