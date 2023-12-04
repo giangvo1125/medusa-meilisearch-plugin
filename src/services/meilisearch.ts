@@ -5,7 +5,6 @@ import { AbstractSearchService, SearchUtils } from "@medusajs/utils";
 import { IMeilisearchPluginOptions } from "../types";
 import { MEILISEARCH_ERROR_CODES } from "../enums";
 import { MEILISEARCH_DEFAULT_HOST } from "../constants";
-import { transformProduct } from "../utils/transform";
 
 class MeiliSearchService extends AbstractSearchService {
   isDefault = false;
@@ -50,16 +49,16 @@ class MeiliSearchService extends AbstractSearchService {
     return this._client.index(meilisearchIndexName);
   }
 
-  async addDocuments(indexName: string, documents: any[], type: string) {
-    const transformedDocuments = this.getTransformedDocuments(type, documents);
+  async addDocuments(indexName: string, documents: any[]) {
+    const transformedDocuments = this.transformDocument(indexName, documents);
     const meilisearchIndexName = this._getIndexByPrefix(indexName);
     return await this._client
       .index(meilisearchIndexName)
       .addDocuments(transformedDocuments);
   }
 
-  async replaceDocuments(indexName: string, documents: any, type: string) {
-    const transformedDocuments = this.getTransformedDocuments(type, documents);
+  async replaceDocuments(indexName: string, documents: any) {
+    const transformedDocuments = this.transformDocument(indexName, documents);
     const meilisearchIndexName = this._getIndexByPrefix(indexName);
     return await this._client
       .index(meilisearchIndexName)
@@ -119,21 +118,17 @@ class MeiliSearchService extends AbstractSearchService {
     }
   }
 
-  getTransformedDocuments(type: string, documents: any[]) {
+  transformDocument(indexName: string, documents: any[]) {
     if (!documents?.length) {
       return [];
     }
 
-    switch (type) {
-      case SearchUtils.indexTypes.PRODUCTS:
-        const productsTransformer =
-          this._config.settings?.[SearchUtils.indexTypes.PRODUCTS]
-            ?.transformer ?? transformProduct;
+    const transformer =
+      this._config.settings?.[indexName]?.transformer ?? undefined;
 
-        return documents.map(productsTransformer);
-      default:
-        return documents;
-    }
+    if (!transformer) return documents;
+
+    return documents.map(transformer);
   }
 
   private _getIndexByPrefix = (indexName: string) =>

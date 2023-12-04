@@ -1,9 +1,7 @@
 import { MeiliSearch } from "meilisearch";
-import { SearchUtils } from "@medusajs/utils";
 import MeiliSearchService from "../meilisearch";
 import { MEILISEARCH_ERROR_CODES } from "../../enums";
 import { mockProduct } from "../__mocks__/service.mock";
-import { transformProduct } from "../../utils/transform";
 class CustomError extends Error {
   code: string;
   constructor(msg: string, code: string) {
@@ -169,7 +167,7 @@ describe("service", () => {
         { logger },
         serviceOptions as any
       );
-      await meiliSearchService.addDocuments(indexName, documents, type);
+      await meiliSearchService.addDocuments(indexName, documents);
       // then
       expect(mockGetIndex).toBeCalledWith(
         `${serviceOptions.prefix}_${indexName}`
@@ -196,7 +194,7 @@ describe("service", () => {
         { logger },
         serviceOptions as any
       );
-      await meiliSearchService.replaceDocuments(indexName, documents, type);
+      await meiliSearchService.replaceDocuments(indexName, documents);
       // then
       expect(mockGetIndex).toBeCalledWith(
         `${serviceOptions.prefix}_${indexName}`
@@ -527,57 +525,59 @@ describe("service", () => {
     });
   });
 
-  describe("getTransformedDocuments", () => {
+  describe("transformDocument", () => {
     it("Should return [] when passing an empty array", () => {
       // given
       const documents = [];
-      const type = "_type";
+      const indexName = "_indexName";
       const meiliSearchService = new MeiliSearchService(
         { logger },
         serviceOptions as any
       );
       // when
-      const expected = meiliSearchService.getTransformedDocuments(
-        type,
+      const expected = meiliSearchService.transformDocument(
+        indexName,
         documents
       );
       // then
       expect(expected).toEqual([]);
     });
 
-    it("Should return documents with product formatted when the type is product", () => {
+    it("Should return documents without transformer function", () => {
       // given
       const documents = [mockProduct()];
+      const indexName = "_indexName";
       const meiliSearchService = new MeiliSearchService(
         { logger },
         serviceOptions as any
       );
       // when
-      const expected = meiliSearchService.getTransformedDocuments(
-        SearchUtils.indexTypes.PRODUCTS,
+      const expected = meiliSearchService.transformDocument(
+        indexName,
         documents
       );
       // then
-      expect(expected).toEqual(documents.map(transformProduct));
+      expect(expected).toEqual(documents);
     });
 
     it("Should return documents with product formatted when the type is product and passing the transformer function", () => {
       // given
       const documents = [mockProduct()];
+      const indexName = "products";
       const transformer = (entity) => ({
         id: entity.id,
       });
       const meiliSearchService = new MeiliSearchService({ logger }, {
         ...serviceOptions,
         settings: {
-          products: {
+          [indexName]: {
             transformer,
           },
         },
       } as any);
       // when
-      const expected = meiliSearchService.getTransformedDocuments(
-        SearchUtils.indexTypes.PRODUCTS,
+      const expected = meiliSearchService.transformDocument(
+        indexName,
         documents
       );
       // then
