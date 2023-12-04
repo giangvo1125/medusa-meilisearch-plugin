@@ -109,10 +109,10 @@ class MeiliSearchService extends AbstractSearchService {
   async upsertIndex(indexName: string, settings: SearchTypes.IndexSettings) {
     try {
       const meilisearchIndexName = this._getIndexByPrefix(indexName);
-      await this._client.getIndex(meilisearchIndexName);
+      return await this._client.getIndex(meilisearchIndexName);
     } catch (error) {
       if (error.code === MEILISEARCH_ERROR_CODES.INDEX_NOT_FOUND) {
-        await this.createIndex(indexName, {
+        return this.createIndex(indexName, {
           primaryKey: settings?.primaryKey ?? "id",
         });
       }

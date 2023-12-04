@@ -1,5 +1,5 @@
 import meilisearchLoader from "../meilisearch";
-import { getMeilisearchLoaderContainerMock } from "../__mocks__/meilisearch.mock";
+import { getMeilisearchLoaderContainerMock } from "../__mocks__/loader.mock";
 import { REGISTER_MEILISEARCH_INDEX_EVENT } from "../../constants";
 
 describe("loaders", () => {
