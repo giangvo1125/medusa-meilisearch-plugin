@@ -50,7 +50,7 @@ class MeiliSearchService extends AbstractSearchService {
     return this._client.index(meilisearchIndexName);
   }
 
-  async addDocuments(indexName: string, documents: any, type: string) {
+  async addDocuments(indexName: string, documents: any[], type: string) {
     const transformedDocuments = this.getTransformedDocuments(type, documents);
     const meilisearchIndexName = this._getIndexByPrefix(indexName);
     return await this._client
