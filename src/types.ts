@@ -5,6 +5,7 @@ export interface IMeilisearchPluginSubscriberSettingOptions {
   serviceName: string;
   relations?: string[];
   indexType?: string;
+  take?: number;
 }
 
 export type IMeilisearchPluginSettingOptions = SearchTypes.IndexSettings & {

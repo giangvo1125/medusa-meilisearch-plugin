@@ -7,7 +7,10 @@ import {
   IMeilisearchPluginSubscriberSettingOptions,
 } from "../types";
 import { MEILISEARCH_ERROR_CODES } from "../enums";
-import { REGISTER_MEILISEARCH_INDEX_EVENT } from "../constants";
+import {
+  DEFAULT_ENTITIES_TAKE,
+  REGISTER_MEILISEARCH_INDEX_EVENT,
+} from "../constants";
 
 interface IService<Entity> {
   list: (
@@ -26,6 +29,7 @@ class EntitySubscriber {
   private readonly _services: Record<string, IService<IEntity>>;
 
   private readonly _settings: Record<string, IMeilisearchPluginSettingOptions>;
+  private readonly _defaultTake: number = DEFAULT_ENTITIES_TAKE;
 
   constructor(
     { logger, meilisearchService, eventBusService, ...services },
@@ -103,10 +107,9 @@ class EntitySubscriber {
     const {
       relations = [],
       serviceName = "",
-      indexType = indexName,
+      take = this._defaultTake,
     } = subscriberSetting;
     try {
-      const TAKE = 100;
       let hasMore = true;
       let count = 0;
       let lastSeenId = "";
@@ -114,17 +117,13 @@ class EntitySubscriber {
       while (hasMore) {
         const entities = await this._retrieveNextEntities({
           lastSeenId,
-          take: TAKE,
+          take,
           relations,
           serviceName,
         });
 
         if (entities.length > 0) {
-          await this._meiliSearchService.addDocuments(
-            indexName,
-            entities,
-            indexType
-          );
+          await this._meiliSearchService.addDocuments(indexName, entities);
           lastSeenId = entities[entities.length - 1].id;
           count += entities.length;
         } else {
@@ -150,14 +149,14 @@ class EntitySubscriber {
    */
   private _addEntity = async ({
     indexName,
-    subscriberSetting: { serviceName, indexType },
+    subscriberSetting: { serviceName },
     entityId,
   }: {
     indexName: string;
     subscriberSetting: IMeilisearchPluginSubscriberSettingOptions;
     entityId: string;
   }): Promise<void> => {
-    const service = this._getServiceByServiceName(serviceName);
+    const service = await this._getServiceByServiceName(serviceName);
     const [entity] = await service.list({ id: entityId });
     if (!entity) {
       throw new MedusaError(
@@ -175,7 +174,7 @@ class EntitySubscriber {
       return;
     }
 
-    await this._meiliSearchService.addDocuments(indexName, [entity], indexType);
+    await this._meiliSearchService.addDocuments(indexName, [entity]);
     this._logger.debug(
       `_addEntity - indexName: ${indexName}, entityId: ${entityId} >>>> added`
     );
@@ -202,7 +201,7 @@ class EntitySubscriber {
     relations?: string[];
     serviceName: string;
   }): Promise<IEntity[]> => {
-    const service = this._getServiceByServiceName(serviceName);
+    const service = await this._getServiceByServiceName(serviceName);
     return await service.list(
       { id: { gt: lastSeenId } },
       {
@@ -230,7 +229,7 @@ class EntitySubscriber {
       serviceName: string;
     } = { serviceName: "" }
   ): Promise<IEntity | undefined> => {
-    const service = this._getServiceByServiceName(serviceName);
+    const service = await this._getServiceByServiceName(serviceName);
     const [entity] = await service.list(
       { id: { gt: "" } },
       {
@@ -258,7 +257,7 @@ class EntitySubscriber {
     indexName: string;
     subscriberSetting: IMeilisearchPluginSubscriberSettingOptions;
   }): Promise<boolean> => {
-    const { relations = [], serviceName = "" } = subscriberSetting;
+    const { relations = [], serviceName } = subscriberSetting;
     const lastEntity = await this._retrieveLastEntity({
       relations,
       serviceName,
@@ -286,7 +285,7 @@ class EntitySubscriber {
   };
 
   /**
-   * get the subscriber setting and verify the index exists or not
+   * get the subscriber setting and verify the index exists or not.
    *
    * @param indexName the meilisearch index.
    * @returns {Promise<IMeilisearchPluginSubscriberSettingOptions>} returning the subscriber setting.
@@ -326,9 +325,8 @@ class EntitySubscriber {
    */
   private _retrieveSubscriberSettingByIndexName = (
     indexName: string
-  ): IMeilisearchPluginSubscriberSettingOptions | undefined => {
-    return this._settings[indexName]?.subscriberSetting;
-  };
+  ): IMeilisearchPluginSubscriberSettingOptions | undefined =>
+    this._settings[indexName]?.subscriberSetting;
 
   /**
    * retrieve the service that will use for retrieve the entities by the service name
@@ -336,9 +334,9 @@ class EntitySubscriber {
    * @param serviceName the service name related with entity
    * @returns {IService<IEntity>} the selected service
    */
-  private _getServiceByServiceName = (
+  private _getServiceByServiceName = async (
     serviceName: string
-  ): IService<IEntity> => {
+  ): Promise<IService<IEntity>> => {
     const service = this._services[serviceName];
     if (!service) {
       throw new MedusaError(
