@@ -4,7 +4,6 @@ import { Config } from "meilisearch";
 export interface IMeilisearchPluginSubscriberSettingOptions {
   serviceName: string;
   relations?: string[];
-  indexType?: string;
   take?: number;
 }
 

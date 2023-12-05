@@ -13,6 +13,7 @@
 
 - Flexible configurations for specifying searchable and retrievable attributes.
 - Utilize MeiliSearch's powerful search functionalities including typo-tolerance, synonyms, filtering, and more.
+- Automatically to add all entities when starting the application if match with the configuration.
 
 ## Install
 
@@ -130,7 +131,7 @@ await eventBusService.emit(eventName, {
     - **`subscriberSetting`**: an object using for the subscriber that includes the following properties:
       - **`relations`**: an optional array of strings indicating the relation of entity when retrieve the entities.
       - **`serviceName`**: an required string indicating the service that will use to retrieve entities for adding **documents** to the **`meilisearch`**.
-      - **`indexType`**: an optional string indicating the default transform document.
+      - **`take`**: an optional number indicating the default take documents to add to the index.
 
 ## Notes
 
