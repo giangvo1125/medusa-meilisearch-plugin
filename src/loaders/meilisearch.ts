@@ -31,10 +31,17 @@ export default async (
           const eventName = REGISTER_MEILISEARCH_INDEX_EVENT;
           const options: Record<string, string> = {};
           if (primaryKey) options.primaryKey = primaryKey;
-          await meilisearchService.createIndex(`${indexName}`, options);
-          await meilisearchService.updateSettings(`${indexName}`, value);
+          const formattedIndexName = meilisearchService.getIndex(indexName);
+          await meilisearchService.createIndex(
+            `${formattedIndexName}`,
+            options
+          );
+          await meilisearchService.updateSettings(
+            `${formattedIndexName}`,
+            value
+          );
           return eventBusService.emit(eventName, {
-            indexName,
+            indexName: formattedIndexName,
           });
         }
       )
